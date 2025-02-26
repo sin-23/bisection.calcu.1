@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bisection Method Calculator</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; background-color: #f9f9f9; }
+    .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 1.5em; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .error { color: red; }
+    label { display: block; margin-top: 1em; }
+    input[type="text"], input[type="number"] { width: 100%; padding: 0.5em; margin-top: 0.3em; box-sizing: border-box; }
+    input[type="submit"] { padding: 0.5em 1em; margin-top: 1.5em; background-color: #e19cb0; border: none; color: white; border-radius: 3px; cursor: pointer; }
+    input[type="submit"]:hover { background-color: #e19cb0; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1em; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    th { background-color: #e19cb0; color: white; }
+    tr:nth-child(even) { background-color: #f2f2f2; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Bisection Method Calculator</h1>
+  {% if error %}
+    <p class="error">{{ error }}</p>
+  {% endif %}
+  <form method="post">
+    <label for="func">Function f(x):</label>
+    <input type="text" name="func" id="func" placeholder="3x3-15x2-20x+50" value="{{ func_value }}" required>
+    <label for="a">Lower Bound (X<sub>L</sub>):</label>
+    <input type="number" name="a" id="a" value="{{ a_value }}" required>
+    <label for="b">Upper Bound (X<sub>U</sub>):</label>
+    <input type="number" name="b" id="b" value="{{ b_value }}" required>
+    <label for="tol">Tolerance (% Relative Error):</label>
+    <input type="number" name="tol" id="tol" placeholder="Default is 1" value="{{ tol_value }}">
+    <label for="decimals">Decimal Places:</label>
+    <input type="number" name="decimals" id="decimals" placeholder="Default is 4" value="{{ decimals_value }}">
+    <input type="submit" value="Find Root">
+  </form>
+  {% if result is not none %}
+    <h2>Approximate Root: {{ result|round(decimals_value|default(4, true)|int) }}</h2>
+  {% endif %}
+  {% if iterations %}
+    <h2>Iteration Details</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Iteration</th>
+          <th>X<sub>L</sub></th>
+          <th>X<sub>U</sub></th>
+          <th>X<sub>r</sub></th>
+          <th>f(X<sub>L</sub>)</th>
+          <th>f(X<sub>r</sub>)</th>
+          <th>ε<sub>a</sub> (%)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for it in iterations %}
+          <tr>
+            <td>{{ it.iter }}</td>
+            <td>{{ it.XL|round(decimals_value|default(4, true)|int) }}</td>
+            <td>{{ it.XU|round(decimals_value|default(4, true)|int) }}</td>
+            <td>{{ it.Xr|round(decimals_value|default(4, true)|int) }}</td>
+            <td>{{ it["f(XL)"]|round(decimals_value|default(4, true)|int) }}</td>
+            <td>{{ it["f(Xr)"]|round(decimals_value|default(4, true)|int) }}</td>
+            <td>{% if it.ea is not none %}{{ it.ea|round(decimals_value|default(4, true)|int) }}{% else %}-{% endif %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+</div>
+</body>
+</html>
