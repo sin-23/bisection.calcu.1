@@ -92,11 +92,11 @@
     <!-- Hidden input that receives the LaTeX code from the math-field -->
     <input type="hidden" name="func_hidden" id="func_hidden" value="{{ func_value }}">
 
-    <label for="a">Lower Bound (X<sub>L</sub>):</label>
-    <input type="number" name="a" id="a" value="{{ a_value }}" required>
+    <label for="a">Lower Boundary (X<sub>L</sub>):</label>
+    <input type="number" name="a" id="a" placeholder="XL" value="{{ a_value }}" required>
 
-    <label for="b">Upper Bound (X<sub>U</sub>):</label>
-    <input type="number" name="b" id="b" value="{{ b_value }}" required>
+    <label for="b">Upper Boundary (X<sub>U</sub>):</label>
+    <input type="number" name="b" id="b" placeholder="XU" value="{{ b_value }}" required>
 
     <label for="tol">Tolerance (% Relative Error):</label>
     <input type="number" name="tol" id="tol" placeholder="Default is 1" value="{{ tol_value }}">
