@@ -51,6 +51,11 @@ def create_function_from_string(func_str, angle_mode="radians"):
     return f
 
 def bisection_method(f, XL, XU, tol=1.0, decimals=4, max_iter=100):
+    # Set a warning if the initial limits are “invalid” (i.e. no sign change)
+    warning = None
+    if f(XL) * f(XU) >= 0:
+        warning = "Warning: The provided limits may be invalid because f(XL) and f(XU) do not have opposite signs."
+
     iterations = []
     previous_Xr = None
     for i in range(1, max_iter + 1):
@@ -74,15 +79,18 @@ def bisection_method(f, XL, XU, tol=1.0, decimals=4, max_iter=100):
             "ea": ea
         })
         if abs(f_Xr) < 1e-12:
-            return Xr, None, iterations
-        if previous_Xr is not None and ea is not None and ea <= tol:
-            return Xr, None, iterations
+            return Xr, warning, iterations
+
+        # Stop iterating when the error rounded to the desired decimal precision is 0.
+        if previous_Xr is not None and ea is not None and round(ea, decimals) == 0:
+            return Xr, warning, iterations
+
         if f(XL) * f_Xr < 0:
             XU = Xr
         else:
             XL = Xr
         previous_Xr = Xr
-    return Xr, None, iterations
+    return Xr, warning, iterations
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -104,6 +112,7 @@ def index():
             session["error"] = "Invalid numerical input for bounds."
             session["result"] = None
             session["iterations"] = None
+            session["warning"] = None
             session["angleMode"] = angle_mode
             session["func_value"] = ""
             session["a_value"] = ""
@@ -117,15 +126,18 @@ def index():
 
         try:
             f = create_function_from_string(func_value, angle_mode)
-            result, error, iterations = bisection_method(f, XL, XU, tol, decimals)
+            result, warning, iterations = bisection_method(f, XL, XU, tol, decimals)
+            error = None
         except Exception as e:
             error = "Error evaluating function: " + str(e)
             result = None
             iterations = None
+            warning = None
 
         # Store results in session then redirect to clear them on refresh.
         session["result"] = result
         session["error"] = error
+        session["warning"] = warning
         session["iterations"] = iterations
         session["angleMode"] = angle_mode
         session["func_value"] = ""
@@ -139,6 +151,7 @@ def index():
         # On GET, pop any stored values so they appear only once.
         result = session.pop("result", None)
         error = session.pop("error", None)
+        warning = session.pop("warning", None)
         iterations = session.pop("iterations", None)
         angle_mode = session.pop("angleMode", "radians")
         func_value = session.pop("func_value", "")
@@ -146,7 +159,7 @@ def index():
         b_value = session.pop("b_value", "")
         tol_value = session.pop("tol_value", "")
         decimals_value = session.pop("decimals_value", "")
-        return render_template("index.html", result=result, error=error, iterations=iterations,
+        return render_template("index.html", result=result, error=error, warning=warning, iterations=iterations,
                                func_value=func_value, a_value=a_value, b_value=b_value,
                                tol_value=tol_value, decimals_value=decimals_value, angleMode=angle_mode)
 
