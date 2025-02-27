@@ -66,7 +66,8 @@
   <script>
     window.addEventListener("load", function() {
       const mf = document.getElementById("mf");
-      mf.setValue("");
+      // Set the MathLive field to the previously submitted value (if any)
+      mf.setValue(document.getElementById("func_hidden").value);
       mf.focus();
       mf.addEventListener("input", function() {
         document.getElementById("func_hidden").value = mf.getValue("latex");
@@ -84,7 +85,7 @@
     <p class="warning">{{ warning }}</p>
   {% endif %}
   <form method="post">
-    <label for="mf">Function f(x):</label>
+    <label for="mf">Function \( f(x) \):</label>
     <!-- MathLive editable field -->
     <math-field id="mf" virtual-keyboard-mode="onfocus" smart-mode="true"
                 placeholder="f(x)"></math-field>
@@ -114,7 +115,7 @@
   </form>
 
   {% if result is not none %}
-    <h2>Approximate Root: {{ result|round(decimals_value|default(4, true)|int) }}</h2>
+    <h2>Approximate Root: {{ result|sup_format(decimals_value|default(6, true)|int)|safe }}</h2>
   {% endif %}
 
   {% if iterations %}
@@ -135,12 +136,18 @@
         {% for it in iterations %}
           <tr>
             <td>{{ it.iter }}</td>
-            <td>{{ it.XL|round(decimals_value|default(4, true)|int) }}</td>
-            <td>{{ it.XU|round(decimals_value|default(4, true)|int) }}</td>
-            <td>{{ it.Xr|round(decimals_value|default(4, true)|int) }}</td>
-            <td>{{ it["f(XL)"]|round(decimals_value|default(4, true)|int) }}</td>
-            <td>{{ it["f(Xr)"]|round(decimals_value|default(4, true)|int) }}</td>
-            <td>{% if it.ea is not none %}{{ it.ea|round(decimals_value|default(4, true)|int) }}{% else %}-{% endif %}</td>
+            <td>{{ it.XL|sup_format(decimals_value|default(6, true)|int)|safe }}</td>
+            <td>{{ it.XU|sup_format(decimals_value|default(6, true)|int)|safe }}</td>
+            <td>{{ it.Xr|sup_format(decimals_value|default(6, true)|int)|safe }}</td>
+            <td>{{ it["f(XL)"]|sup_format(decimals_value|default(6, true)|int)|safe }}</td>
+            <td>{{ it["f(Xr)"]|sup_format(decimals_value|default(6, true)|int)|safe }}</td>
+            <td>
+              {% if it.ea is not none %}
+                {{ it.ea|sup_format(decimals_value|default(6, true)|int)|safe }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
           </tr>
         {% endfor %}
       </tbody>

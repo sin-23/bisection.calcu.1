@@ -92,6 +92,23 @@ def bisection_method(f, XL, XU, tol=1.0, decimals=4, max_iter=100):
         previous_Xr = Xr
     return Xr, warning, iterations
 
+# Custom filter to format numbers with superscript exponent if in scientific notation.
+@app.template_filter('sup_format')
+def sup_format(value, decimals=6):
+    try:
+        value = float(value)
+        # Use general formatting to potentially get scientific notation.
+        formatted = f"{value:.{decimals}g}"
+        if "e" in formatted:
+            base, exp = formatted.split("e")
+            exp = int(exp)
+            return f"{base}×10<sup>{exp}</sup>"
+        else:
+            # If not in scientific notation, use fixed-point format.
+            return f"{value:.{decimals}f}"
+    except Exception:
+        return value
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
@@ -114,11 +131,12 @@ def index():
             session["iterations"] = None
             session["warning"] = None
             session["angleMode"] = angle_mode
-            session["func_value"] = ""
-            session["a_value"] = ""
-            session["b_value"] = ""
-            session["tol_value"] = ""
-            session["decimals_value"] = ""
+            # Retain the values so they appear in the form.
+            session["func_value"] = func_value
+            session["a_value"] = a_value
+            session["b_value"] = b_value
+            session["tol_value"] = tol_value
+            session["decimals_value"] = decimals_value
             return redirect(url_for('index'))
 
         tol = float(tol_value) if tol_value else 1.0
@@ -134,17 +152,18 @@ def index():
             iterations = None
             warning = None
 
-        # Store results in session then redirect to clear them on refresh.
+        # Store results in session along with the input values so they are retained.
         session["result"] = result
         session["error"] = error
         session["warning"] = warning
         session["iterations"] = iterations
         session["angleMode"] = angle_mode
-        session["func_value"] = ""
-        session["a_value"] = ""
-        session["b_value"] = ""
-        session["tol_value"] = ""
-        session["decimals_value"] = ""
+        session["func_value"] = func_value
+        session["a_value"] = a_value
+        session["b_value"] = b_value
+        session["tol_value"] = tol_value
+        session["decimals_value"] = decimals_value
+
         return redirect(url_for('index'))
 
     else:
