@@ -81,8 +81,8 @@ def bisection_method(f, XL, XU, tol=1.0, decimals=4, max_iter=100):
         if abs(f_Xr) < 1e-12:
             return Xr, warning, iterations
 
-        # Stop iterating when the error rounded to the desired decimal precision is 0.
-        if previous_Xr is not None and ea is not None and round(ea, decimals) == 0:
+        # Stop iterating when the relative error is below or equal to the user-specified tolerance.
+        if previous_Xr is not None and ea is not None and ea <= tol:
             return Xr, warning, iterations
 
         if f(XL) * f_Xr < 0:
